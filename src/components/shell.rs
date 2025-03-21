@@ -1,5 +1,5 @@
-use std::env;
 use dirs;
+use std::env;
 use std::process::{Command, Output};
 use std::str;
 

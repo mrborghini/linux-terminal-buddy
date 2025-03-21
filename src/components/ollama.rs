@@ -1,4 +1,4 @@
-use super::{LLMProvider, Message};
+use super::{LLMProvider, Message, get_reqwest_client};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -69,10 +69,7 @@ impl Ollama {
             base_url: ollama_url,
             model,
             num_ctx,
-            client: reqwest::Client::builder()
-                .timeout(std::time::Duration::from_secs(300))
-                .build()
-                .unwrap(),
+            client: get_reqwest_client(),
         }
     }
 }

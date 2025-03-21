@@ -12,3 +12,11 @@ control to a terminal to an AI.
 ```bash
 cargo run --release
 ```
+
+By default it will use Ollama, but if you want to use OpenAI you need to do:
+
+```bash
+cp .env.example .env
+```
+
+And then add your API key to the `.env` file

@@ -143,7 +143,7 @@ impl LLM {
 pub trait LLMProvider {
     async fn get_llm_message(
         &self,
-        message: &Vec<Message>,
+        messages: &Vec<Message>,
         format: Option<serde_json::Value>,
     ) -> Message;
 }
