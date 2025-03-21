@@ -76,11 +76,12 @@ impl LLM {
         });
 
         let mut no_command_count = 0;
+        let format =  self.get_format();
 
         loop {
             let llm_message = self
                 .llm_provider
-                .get_llm_message(&self.conversation, self.get_format())
+                .get_llm_message(&self.conversation, format.clone())
                 .await;
 
             self.add_message(llm_message.clone());
