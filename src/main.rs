@@ -35,7 +35,12 @@ async fn main() {
 
     let shell = Shell::new(selected_shell);
 
-    let mut llm = LLM::new(select_llm(), shell, true);
+    let allow_all_commands = env::var("ALLOW_ALL_COMMANDS")
+        .unwrap_or("false".to_string())
+        .to_lowercase()
+        == "true";
+
+    let mut llm = LLM::new(select_llm(), shell, !allow_all_commands);
 
     loop {
         println!("What is my task?");
