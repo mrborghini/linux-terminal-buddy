@@ -24,6 +24,7 @@ pub struct LLM {
     llm_provider: Box<dyn LLMProvider>,
     shell: Shell,
     always_confirm: bool,
+    current_path: String,
 }
 
 impl LLM {
@@ -33,6 +34,11 @@ impl LLM {
             llm_provider,
             shell,
             always_confirm,
+            current_path: std::env::current_dir()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string()
         }
     }
 
@@ -41,14 +47,14 @@ impl LLM {
     }
 
     fn get_system_message(&self, task: String) -> String {
-        let content = fs::read_to_string("system_message.md")
+        let content = fs::read_to_string(format!("{}/system_message.md", self.current_path))
             .unwrap_or("{{TASK}}".to_string())
             .replace("{{TASK}}", &task);
         content
     }
 
     fn get_format(&self) -> Option<serde_json::Value> {
-        let format = fs::read_to_string("llm_format.json")
+        let format = fs::read_to_string(format!("{}/llm_format.json", self.current_path))
             .ok()
             .map(|f| serde_json::from_str(&f).unwrap());
         format
@@ -76,7 +82,7 @@ impl LLM {
         });
 
         let mut no_command_count = 0;
-        let format =  self.get_format();
+        let format = self.get_format();
 
         loop {
             let llm_message = self
