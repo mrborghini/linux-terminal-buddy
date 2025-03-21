@@ -6,7 +6,7 @@ async fn main() {
     let ollama = Ollama::new(
         "http://localhost:11434".to_string(),
         "llama3.1".to_string(),
-        8192,
+        32768,
     );
 
     let mut llm = LLM::new(Box::new(ollama));
