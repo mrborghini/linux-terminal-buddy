@@ -13,6 +13,7 @@
     },
     "required": [
         "thinking_process",
-        "task_complete"
+        "task_complete",
+        "command"
     ]
 }

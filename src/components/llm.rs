@@ -1,4 +1,4 @@
-use super::utils::execute_command;
+use super::Shell;
 use chrono::Local;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -22,13 +22,17 @@ struct ParsedMessageContent {
 pub struct LLM {
     conversation: Vec<Message>,
     llm_provider: Box<dyn LLMProvider>,
+    shell: Shell,
+    always_confirm: bool,
 }
 
 impl LLM {
-    pub fn new(llm_provider: Box<dyn LLMProvider>) -> Self {
+    pub fn new(llm_provider: Box<dyn LLMProvider>, shell: Shell, always_confirm: bool) -> Self {
         Self {
             conversation: Vec::new(),
             llm_provider,
+            shell,
+            always_confirm,
         }
     }
 
@@ -48,6 +52,14 @@ impl LLM {
             .ok()
             .map(|f| serde_json::from_str(&f).unwrap());
         format
+    }
+
+    fn ensure_allowed(&self) -> bool {
+        if self.always_confirm {
+            let allow_command = read_line(Some("Do you want to execute the command? (y/n) > "));
+            return allow_command.to_lowercase() == "y";
+        }
+        true
     }
 
     pub async fn run(&mut self, task: String) {
@@ -99,30 +111,28 @@ impl LLM {
             no_command_count = 0;
 
             println!(
-                "The LLM want to execute: {}",
+                "The LLM wants to execute: {}",
                 parsed_message.command.clone().unwrap()
             );
 
-            let allow_command = read_line(Some("Do you want to execute the command? (y/n) > "));
-
             let cmd = &parsed_message.command.as_ref().unwrap().clone();
 
-            if allow_command.to_lowercase() == "y" {
-                let command_output = execute_command(cmd.to_string());
+            if self.ensure_allowed() {
+                let command_output = self.shell.execute_command(cmd);
                 println!("{} executed: {}", cmd, command_output);
                 self.add_message(Message {
                     content: command_output.clone(),
                     role: "user".to_string(),
                     timestamp: Some(Local::now().to_rfc2822()),
                 });
-            } else {
-                println!("`{}` not executed!", cmd);
-                self.add_message(Message {
-                    content: format!("The command `{}` was not approved by the user.", cmd),
-                    role: "user".to_string(),
-                    timestamp: Some(Local::now().to_rfc2822()),
-                });
+                continue;
             }
+            println!("`{}` not executed!", cmd);
+            self.add_message(Message {
+                content: format!("The command `{}` was not approved by the user.", cmd),
+                role: "user".to_string(),
+                timestamp: Some(Local::now().to_rfc2822()),
+            });
         }
 
         self.conversation = Vec::new();
