@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "command": {
+            "type": "string"
+        },
+        "thinking_process": {
+            "type": "string"
+        },
+        "task_complete": {
+            "type": "boolean"
+        }
+    },
+    "required": [
+        "command",
+        "thinking_process",
+        "task_complete"
+    ]
+}
