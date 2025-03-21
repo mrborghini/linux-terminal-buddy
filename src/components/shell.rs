@@ -26,11 +26,10 @@ impl Shell {
 
         // Handle 'cd' command
         if command.starts_with("cd ") {
-            let path = &command[3..].trim();
+            let path = self.get_dir(command.to_string());
             if let Err(e) = self.change_directory(path) {
                 return format!("Error changing directory: {}", e);
             }
-            return String::new(); // 'cd' doesn't return output
         }
 
         // Execute the command in the current directory
@@ -45,6 +44,12 @@ impl Shell {
         self.handle_output(output)
     }
 
+    fn get_dir(&self, command: String) -> String {
+        let path = command.split("cd ").collect::<Vec<&str>>()[1];
+        let end = path.split(" &&").collect::<Vec<&str>>()[0];
+        end.to_string()
+    }
+
     // Handle the output from the command
     fn handle_output(&self, output: Output) -> String {
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -53,11 +58,11 @@ impl Shell {
     }
 
     // Change the current directory
-    fn change_directory(&mut self, path: &str) -> Result<(), std::io::Error> {
+    fn change_directory(&mut self, path: String) -> Result<(), std::io::Error> {
         let new_path = if path == "~" {
             dirs::home_dir().unwrap()
         } else {
-            std::path::Path::new(path).to_path_buf()
+            std::path::Path::new(&path).to_path_buf()
         };
 
         // Change directory and update the current directory

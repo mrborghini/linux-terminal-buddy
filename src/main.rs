@@ -30,7 +30,9 @@ async fn main() {
     let dotenv_reader = DotEnvReader::new(".env");
     dotenv_reader.parse_and_set_env();
 
-    let shell = Shell::new("sh".to_string());
+    let mut shell = Shell::new("sh".to_string());
+    println!("Shell: {}", shell.execute_command("cd .. && ls"));
+    // println!("Shell: {}", shell.execute_command("ls"));
 
     let allow_all_commands = env::var("ALLOW_ALL_COMMANDS")
         .unwrap_or("false".to_string())
