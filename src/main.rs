@@ -1,4 +1,4 @@
-use components::{LLM, Ollama};
+use components::{read_line, Ollama, LLM};
 
 mod components;
 
@@ -8,7 +8,7 @@ async fn main() {
     let mut llm = LLM::new(Box::new(ollama));
 
     println!("What is my task?");
-    let line = components::utils::read_line(Some("> "));
+    let line = read_line(Some("> "));
     println!("You said: {}", line);
     llm.run(line).await;
 }

@@ -1,3 +1,5 @@
+use std::fs;
+
 use chrono::Local;
 use serde::{Deserialize, Serialize};
 
@@ -25,26 +27,23 @@ impl LLM {
         self.conversation.push(message);
     }
 
-    fn get_system_message(&self) -> String {
-        format!(
-            "You are a self prompting LLM. Your goal is to do the following task:
-
-        **{{TASK}}**.
-
-        You have access to a Linux terminal to do it. You can run any command using the
-        `command` field. If you think the task is completely completed set the
-        `task_complete` field to `true`. If the task is still in progress set the
-        `task_complete` field to `false`"
-        )
+    fn get_system_message(&self, task: String) -> String {
+        let content = fs::read_to_string("system_message.md")
+            .unwrap_or("{{TASK}}".to_string())
+            .replace("{{TASK}}", &task);
+        content
     }
 
     pub async fn run(&mut self, task: String) {
         self.add_message(Message {
-            content: task,
+            content: self.get_system_message(task),
             role: "system".to_string(),
             timestamp: Local::now().to_rfc2822(),
         });
-        println!("{}", self.llm_provider.get_llm_message(&self.conversation).await);
+        println!(
+            "{}",
+            self.llm_provider.get_llm_message(&self.conversation).await
+        );
 
         self.conversation = Vec::new();
     }
