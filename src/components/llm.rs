@@ -126,7 +126,6 @@ impl LLM {
 
             if self.ensure_allowed() {
                 let command_output = self.shell.execute_command(cmd);
-                println!("{} executed: {}", cmd, command_output);
                 self.add_message(Message {
                     content: command_output.clone(),
                     role: "user".to_string(),

@@ -1,7 +1,8 @@
 use dirs;
 use std::env;
-use std::process::{Command, Output};
+use std::process::Command;
 use std::str;
+use std::io::{BufRead, BufReader};
 
 pub struct Shell {
     shell: String,
@@ -21,6 +22,7 @@ impl Shell {
 
     // Execute a command in the shell
     pub fn execute_command(&mut self, command: &str) -> String {
+
         // Store the command in history
         self.history.push(command.to_string());
 
@@ -38,16 +40,44 @@ impl Shell {
             return String::new(); // 'cd' doesn't return output
         }
 
-        // Execute the command in the current directory
-        let output = Command::new(&self.shell)
+        // Spawn the command in the current directory
+        let mut child = Command::new(&self.shell)
             .arg("-c")
             .arg(command)
             .current_dir(&self.current_directory)
-            .output()
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
             .expect("failed to execute process");
 
-        // Return the output
-        self.handle_output(output)
+        let stdout = child.stdout.take().expect("failed to capture stdout");
+        let stderr = child.stderr.take().expect("failed to capture stderr");
+
+        let stdout_reader = BufReader::new(stdout);
+        let stderr_reader = BufReader::new(stderr);
+
+        // Read and print stdout and stderr in real time
+        let mut output = String::new();
+        for line in stdout_reader.lines() {
+            if let Ok(line) = line {
+                println!("{}", line);
+                output.push_str(&line);
+                output.push('\n');
+            }
+        }
+
+        for line in stderr_reader.lines() {
+            if let Ok(line) = line {
+                eprintln!("{}", line);
+                output.push_str(&line);
+                output.push('\n');
+            }
+        }
+
+        // Wait for the child process to finish
+        child.wait().expect("failed to wait on child");
+
+        output.trim().to_string()
     }
 
     fn get_dir_and_rest(&self, command: String) -> (String, String) {
@@ -63,11 +93,11 @@ impl Shell {
     }
 
     // Handle the output from the command
-    fn handle_output(&self, output: Output) -> String {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        format!("{}{}", stdout, stderr).trim().to_string()
-    }
+    // fn handle_output(&self, output: Output) -> String {
+    //     let stdout = String::from_utf8_lossy(&output.stdout);
+    //     let stderr = String::from_utf8_lossy(&output.stderr);
+    //     format!("{}{}", stdout, stderr).trim().to_string()
+    // }
 
     // Change the current directory
     fn change_directory(&mut self, path: String) -> Result<(), std::io::Error> {
