@@ -12,7 +12,6 @@
         }
     },
     "required": [
-        "command",
         "thinking_process",
         "task_complete"
     ]

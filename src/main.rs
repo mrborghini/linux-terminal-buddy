@@ -1,10 +1,14 @@
-use components::{read_line, Ollama, LLM};
-
+use components::{LLM, Ollama, read_line};
 mod components;
 
 #[tokio::main]
 async fn main() {
-    let ollama = Ollama::new("http://localhost:11434".to_string());
+    let ollama = Ollama::new(
+        "http://localhost:11434".to_string(),
+        "llama3.1".to_string(),
+        8192,
+    );
+
     let mut llm = LLM::new(Box::new(ollama));
 
     println!("What is my task?");
