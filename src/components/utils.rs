@@ -3,5 +3,5 @@ pub fn read_line(message: Option<&str>) -> String {
     print!("{}", message.unwrap_or(""));
     std::io::Write::flush(&mut std::io::stdout()).unwrap();
     std::io::stdin().read_line(&mut buffer).unwrap();
-    buffer
+    buffer.trim().to_string()
 }
