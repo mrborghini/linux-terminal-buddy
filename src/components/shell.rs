@@ -26,10 +26,16 @@ impl Shell {
 
         // Handle 'cd' command
         if command.starts_with("cd ") {
-            let path = self.get_dir(command.to_string());
+            let (path, rest) = self.get_dir_and_rest(command.to_string());
             if let Err(e) = self.change_directory(path) {
                 return format!("Error changing directory: {}", e);
             }
+
+            if !rest.is_empty() {
+                return self.execute_command(&rest);
+            }
+
+            return String::new(); // 'cd' doesn't return output
         }
 
         // Execute the command in the current directory
@@ -44,10 +50,16 @@ impl Shell {
         self.handle_output(output)
     }
 
-    fn get_dir(&self, command: String) -> String {
-        let path = command.split("cd ").collect::<Vec<&str>>()[1];
-        let end = path.split(" &&").collect::<Vec<&str>>()[0];
-        end.to_string()
+    fn get_dir_and_rest(&self, command: String) -> (String, String) {
+        let parts: Vec<&str> = command.splitn(2, "cd ").collect();
+        if parts.len() < 2 {
+            return (String::new(), command);
+        }
+        let path_and_rest = parts[1];
+        let mut split = path_and_rest.splitn(2, " &&");
+        let path = split.next().unwrap_or("").trim().to_string();
+        let rest = split.next().unwrap_or("").trim().to_string();
+        (path, rest)
     }
 
     // Handle the output from the command
