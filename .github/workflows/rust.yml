@@ -96,15 +96,15 @@ jobs:
     env:
       EXTRACTED_VERSION: ${{ needs.extract-version.outputs.version }}
       ARTIFACTS_DIR: "downloaded-artifacts/"
-      LINUX_AMD64_PATH:
-      WINDOWS_AMD64_PATH:
+      LINUX_AMD64_PATH: ""
+      WINDOWS_AMD64_PATH: ""
     
     steps:
     - uses: actions/checkout@v4
 
     - name: Set computed environment variables
       run: |
-        echo "WINDOWS_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Windows" >> $GITHUB_ENV
+        echo "WINDOWS_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Windows.exe" >> $GITHUB_ENV
         echo "LINUX_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Linux" >> $GITHUB_ENV
 
     - name: Install github CLI
