@@ -101,7 +101,7 @@ jobs:
     
     - name: Create release artifact
       run: |
-        cp target/release/${{ env.EXECUTABLE_NAME }}.exe ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
+        cp target/${{ env.TARGET_COMPILER }}/release/${{ env.EXECUTABLE_NAME }}.exe ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
