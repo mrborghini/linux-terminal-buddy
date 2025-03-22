@@ -52,9 +52,6 @@ jobs:
         name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
         path: ./
 
-    - name: DEBUG
-      run: ls
-      
   build-windows-x86_64:
     runs-on: windows-latest
 
@@ -82,9 +79,38 @@ jobs:
       with:
         name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
         path: ./
+
+  build-windows-aarch64:
+    runs-on: windows-latest
+
+    env:
+      IDENTIFIER: "aarch64-Windows"
+      TARGET_COMPILER: "aarch64-pc-windows-msvc"
+  
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      run: rustup update stable
+
+    - name: Download cross compiler
+      run: rustup target add ${{ env.TARGET_COMPILER }}
+
+    - name: Run tests
+      run: cargo test --release --target ${{ env.TARGET_COMPILER }} --verbose
+
+    - name: Run build
+      run: cargo build --release --target ${{ env.TARGET_COMPILER }} --verbose
     
-    - name: DEBUG
-      run: ls
+    - name: Create release artifact
+      run: |
+        cp target/release/${{ env.EXECUTABLE_NAME }}.exe ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
+        path: ./
 
   release:
     runs-on: ubuntu-latest
@@ -92,12 +118,14 @@ jobs:
       - extract-version
       - build-linux-x86_64
       - build-windows-x86_64
+      - build-windows-aarch64
 
     env:
       EXTRACTED_VERSION: ${{ needs.extract-version.outputs.version }}
       ARTIFACTS_DIR: "downloaded-artifacts/"
       LINUX_AMD64_PATH: ""
       WINDOWS_AMD64_PATH: ""
+      WINDOWS_AARCH64_PATH: ""
     
     steps:
     - uses: actions/checkout@v4
@@ -105,21 +133,28 @@ jobs:
     - name: Set computed environment variables
       run: |
         echo "WINDOWS_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Windows.exe" >> $GITHUB_ENV
+        echo "WINDOWS_AARCH64_PATH=${EXECUTABLE_NAME}-aarch64-Windows.exe" >> $GITHUB_ENV
         echo "LINUX_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Linux" >> $GITHUB_ENV
 
     - name: Install github CLI
       run: sudo apt install gh -y
     
-    - name: Download Linux Artifact
+    - name: Download Linux x86_64 Artifact
       uses: actions/download-artifact@v4
       with:
         name: ${{ env.LINUX_AMD64_PATH }}
         path: ${{ env.ARTIFACTS_DIR }}
     
-    - name: Download Windows Artifact
+    - name: Download Windows x86_64 Artifact
       uses: actions/download-artifact@v4
       with:
         name: ${{ env.WINDOWS_AMD64_PATH }}
+        path: ${{ env.ARTIFACTS_DIR }}
+
+    - name: Download Windows aarch64 Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.WINDOWS_AARCH64_PATH }}
         path: ${{ env.ARTIFACTS_DIR }}
     
     - name: Create GitHub Release
@@ -135,6 +170,7 @@ jobs:
         gh release create $EXTRACTED_VERSION \
           ${{ env.ARTIFACTS_DIR }}${{ env.LINUX_AMD64_PATH }} \
           ${{ env.ARTIFACTS_DIR }}${{ env.WINDOWS_AMD64_PATH }} \
+          ${{ env.ARTIFACTS_DIR }}${{ env.WINDOWS_AARCH64_PATH }} \
           --title "Release $EXTRACTED_VERSION" \
           --notes "Automated release of version $EXTRACTED_VERSION.
 
