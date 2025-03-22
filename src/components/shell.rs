@@ -1,8 +1,8 @@
 use dirs;
 use std::env;
+use std::io::{BufRead, BufReader};
 use std::process::Command;
 use std::str;
-use std::io::{BufRead, BufReader};
 
 pub struct Shell {
     shell: String,
@@ -22,7 +22,6 @@ impl Shell {
 
     // Execute a command in the shell
     pub fn execute_command(&mut self, command: &str) -> String {
-
         // Store the command in history
         self.history.push(command.to_string());
 
