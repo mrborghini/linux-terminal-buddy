@@ -46,6 +46,12 @@ jobs:
       run: |
         cp target/release/${{ env.EXECUTABLE_NAME }} ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
+        path: ./
+
     - name: DEBUG
       run: ls
       
@@ -74,8 +80,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
-        path: artifacts/
+        name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
+        path: ./
     
     - name: DEBUG
       run: ls
