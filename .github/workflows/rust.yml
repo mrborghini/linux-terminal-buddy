@@ -52,9 +52,6 @@ jobs:
         name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
         path: ./
 
-    - name: DEBUG
-      run: ls
-      
   build-windows-x86_64:
     runs-on: windows-latest
 
@@ -82,9 +79,6 @@ jobs:
       with:
         name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
         path: ./
-    
-    - name: DEBUG
-      run: ls
 
   release:
     runs-on: ubuntu-latest
