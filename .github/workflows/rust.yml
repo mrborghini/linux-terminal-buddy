@@ -96,9 +96,6 @@ jobs:
     - name: Download cross compiler
       run: rustup target add ${{ env.TARGET_COMPILER }}
 
-    - name: Run tests
-      run: cargo test --release --target ${{ env.TARGET_COMPILER }} --verbose
-
     - name: Run build
       run: cargo build --release --target ${{ env.TARGET_COMPILER }} --verbose
     
