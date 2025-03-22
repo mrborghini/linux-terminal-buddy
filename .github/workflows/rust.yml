@@ -255,6 +255,7 @@ jobs:
 
         gh release create $EXTRACTED_VERSION \
           ${{ env.ARTIFACTS_DIR }}${{ env.LINUX_AMD64_PATH }} \
+          ${{ env.ARTIFACTS_DIR }}${{ env.LINUX_AMD64_MUSL_PATH }} \
           ${{ env.ARTIFACTS_DIR }}${{ env.LINUX_AARCH64_PATH }} \
           ${{ env.ARTIFACTS_DIR }}${{ env.WINDOWS_AMD64_PATH }} \
           ${{ env.ARTIFACTS_DIR }}${{ env.WINDOWS_AARCH64_PATH }} \
