@@ -38,7 +38,7 @@ impl LLM {
                 .unwrap()
                 .to_str()
                 .unwrap()
-                .to_string()
+                .to_string(),
         }
     }
 
