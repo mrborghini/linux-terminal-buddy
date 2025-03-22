@@ -44,8 +44,7 @@ jobs:
 
     - name: Create release artifact
       run: |
-        mkdir -p artifacts
-        cp target/release/${{ env.EXECUTABLE_NAME }} artifacts/${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
+        cp target/release/${{ env.EXECUTABLE_NAME }} ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
       
   build-windows-x86_64:
     runs-on: windows-latest
@@ -67,8 +66,7 @@ jobs:
     
     - name: Create release artifact
       run: |
-        mkdir -p artifacts
-        cp target/release/${{ env.EXECUTABLE_NAME }}.exe artifacts/${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
+        cp target/release/${{ env.EXECUTABLE_NAME }}.exe ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}.exe
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -123,8 +121,8 @@ jobs:
         # RELEASE_NOTES=$(gh api repos/:owner/:repo/pulls --jq '.[] | select(.merged_at != null) | "- #\(.number) \(.title) (@\(.user.login))"')
 
         gh release create $EXTRACTED_VERSION \
-          ${{ env.ARTIFACTS_DIR }}$LINUX_AMD64_PATH \
-          ${{ env.ARTIFACTS_DIR }}$WINDOWS_AMD64_PATH.exe \
+          ${{ env.ARTIFACTS_DIR }}${{ env.LINUX_AMD64_PATH }} \
+          ${{ env.ARTIFACTS_DIR }}${{ env.WINDOWS_AMD64_PATH }} \
           --title "Release $EXTRACTED_VERSION" \
           --notes "Automated release of version $EXTRACTED_VERSION.
 
