@@ -88,6 +88,41 @@ jobs:
         name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
         path: ./
 
+  build-linux-x86_64-musl:
+    runs-on: ubuntu-latest
+
+    env:
+      IDENTIFIER: "x86_64-musl-Linux"
+      TARGET_COMPILER: "x86_64-unknown-linux-musl"
+  
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      run: rustup update stable
+
+    - name: Download cross compiler
+      run: rustup target add ${{ env.TARGET_COMPILER }}
+
+    - name: Install build dependencies
+      run: sudo apt install musl-tools -y
+
+    - name: Setup vendored openssl
+      run: cargo add openssl -F vendored
+
+    - name: Run build
+      run: cargo build --release --target ${{ env.TARGET_COMPILER }} --verbose
+    
+    - name: Create release artifact
+      run: |
+        cp target/${{ env.TARGET_COMPILER }}/release/${{ env.EXECUTABLE_NAME }} ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
+        path: ./
+
   build-windows-x86_64:
     runs-on: windows-latest
 
@@ -151,6 +186,7 @@ jobs:
       - extract-version
       - build-linux-x86_64
       - build-linux-aarch64
+      - build-linux-x86_64-musl
       - build-windows-x86_64
       - build-windows-aarch64
 
@@ -158,6 +194,7 @@ jobs:
       EXTRACTED_VERSION: ${{ needs.extract-version.outputs.version }}
       ARTIFACTS_DIR: "downloaded-artifacts/"
       LINUX_AMD64_PATH: ""
+      LINUX_AMD64_MUSL_PATH: ""
       LINUX_AARCH64_PATH: ""
       WINDOWS_AMD64_PATH: ""
       WINDOWS_AARCH64_PATH: ""
@@ -168,6 +205,7 @@ jobs:
     - name: Set computed environment variables
       run: |
         echo "LINUX_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Linux" >> $GITHUB_ENV
+        echo "LINUX_AMD64_MUSL_PATH=${EXECUTABLE_NAME}-x86_64-Linux-musl" >> $GITHUB_ENV
         echo "LINUX_AARCH64_PATH=${EXECUTABLE_NAME}-aarch64-Linux" >> $GITHUB_ENV
         echo "WINDOWS_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Windows.exe" >> $GITHUB_ENV
         echo "WINDOWS_AARCH64_PATH=${EXECUTABLE_NAME}-aarch64-Windows.exe" >> $GITHUB_ENV
@@ -179,6 +217,12 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: ${{ env.LINUX_AMD64_PATH }}
+        path: ${{ env.ARTIFACTS_DIR }}
+
+    - name: Download Linux Musl x86_64 Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.LINUX_AMD64_MUSL_PATH }}
         path: ${{ env.ARTIFACTS_DIR }}
 
     - name: Download Linux aarch64 Artifact
