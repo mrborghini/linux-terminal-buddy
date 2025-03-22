@@ -39,7 +39,7 @@ jobs:
     - name: Run tests
       run: cargo test --release --verbose
 
-    - name: Build ${{ env.IDENTIFIER }}
+    - name: Run build
       run: cargo build --release --verbose
 
     - name: Create release artifact
@@ -62,7 +62,7 @@ jobs:
     - name: Run tests
       run: cargo test --release --verbose
 
-    - name: Build ${{ env.IDENTIFIER }}
+    - name: Run build
       run: cargo build --release --verbose
     
     - name: Create release artifact
@@ -85,12 +85,15 @@ jobs:
 
     env:
       EXTRACTED_VERSION: ${{ needs.extract-version.outputs.version }}
-      WINDOWS_AMD64_PATH: "${{ github.env.EXECUTABLE_NAME }}-x86_64-Windows"
-      LINUX_AMD64_PATH: "${{ github.env.EXECUTABLE_NAME }}-x86_64-Linux"
       ARTIFACTS_DIR: "downloaded-artifacts/"
     
     steps:
     - uses: actions/checkout@v4
+
+    - name: Set computed environment variables
+      run: |
+        echo "WINDOWS_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Windows" >> $GITHUB_ENV
+        echo "LINUX_AMD64_PATH=${EXECUTABLE_NAME}-x86_64-Linux" >> $GITHUB_ENV
 
     - name: Install github CLI
       run: sudo apt install gh -y
@@ -98,13 +101,13 @@ jobs:
     - name: Download Linux Artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{ env.LINUX_AMD64_PATH }}
+        name: $LINUX_AMD64_PATH
         path: ${{ env.ARTIFACTS_DIR }}
 
     - name: Download Windows Artifact
       uses: actions/download-artifact@v4
       with:
-        name: ${{ env.WINDOWS_AMD64_PATH }}
+        name: $WINDOWS_AMD64_PATH
         path: ${{ env.ARTIFACTS_DIR }}
     
     - name: Create GitHub Release
@@ -118,8 +121,8 @@ jobs:
         # RELEASE_NOTES=$(gh api repos/:owner/:repo/pulls --jq '.[] | select(.merged_at != null) | "- #\(.number) \(.title) (@\(.user.login))"')
 
         gh release create $EXTRACTED_VERSION \
-          ${{ env.ARTIFACTS_DIR }}${{ env.LINUX_AMD64_PATH }} \
-          ${{ env.ARTIFACTS_DIR }}${{ env.WINDOWS_AMD64_PATH }}.exe \
+          ${{ env.ARTIFACTS_DIR }}$LINUX_AMD64_PATH \
+          ${{ env.ARTIFACTS_DIR }}$WINDOWS_AMD64_PATH.exe \
           --title "Release $EXTRACTED_VERSION" \
           --notes "Automated release of version $EXTRACTED_VERSION.
 
