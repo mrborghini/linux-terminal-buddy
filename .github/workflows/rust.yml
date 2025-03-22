@@ -68,6 +68,9 @@ jobs:
     - name: Download cross compiler
       run: rustup target add ${{ env.TARGET_COMPILER }}
 
+    - name: Install build dependencies
+      run: sudo apt install gcc-aarch64-linux-gnu -y
+
     - name: Setup vendored openssl
       run: cargo add openssl -F vendored
 
