@@ -86,6 +86,8 @@ jobs:
     env:
       EXTRACTED_VERSION: ${{ needs.extract-version.outputs.version }}
       ARTIFACTS_DIR: "downloaded-artifacts/"
+      LINUX_AMD64_PATH:
+      WINDOWS_AMD64_PATH:
     
     steps:
     - uses: actions/checkout@v4
@@ -101,13 +103,13 @@ jobs:
     - name: Download Linux Artifact
       uses: actions/download-artifact@v4
       with:
-        name: $LINUX_AMD64_PATH
+        name: ${{ env.LINUX_AMD64_PATH }}
         path: ${{ env.ARTIFACTS_DIR }}
-
+    
     - name: Download Windows Artifact
       uses: actions/download-artifact@v4
       with:
-        name: $WINDOWS_AMD64_PATH
+        name: ${{ env.WINDOWS_AMD64_PATH }}
         path: ${{ env.ARTIFACTS_DIR }}
     
     - name: Create GitHub Release
