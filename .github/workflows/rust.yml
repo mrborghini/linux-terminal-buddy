@@ -45,6 +45,9 @@ jobs:
     - name: Create release artifact
       run: |
         cp target/release/${{ env.EXECUTABLE_NAME }} ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
+
+    - name: DEBUG
+      run: ls
       
   build-windows-x86_64:
     runs-on: windows-latest
@@ -73,6 +76,9 @@ jobs:
       with:
         name: ${{ env.EXECUTABLE_NAME }}-${{ env.IDENTIFIER }}
         path: artifacts/
+    
+    - name: DEBUG
+      run: ls
 
   release:
     runs-on: ubuntu-latest
