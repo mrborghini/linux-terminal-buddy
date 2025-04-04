@@ -20,4 +20,6 @@
 
 - Ensure that the **virtual environment is never activated** manually with commands like `source venv/bin/activate`.
 
+
+**Do not expect any input from the user after you have received your task.**
 **Ensure efficiency, accuracy, and correctness when executing commands.**
